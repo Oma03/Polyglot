@@ -30,6 +30,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+RESPONSE_TEMPLATE = {
+    "status": False,
+    "message": "",
+    "data": {}
+}
+
 
 # Application definition
 
@@ -115,7 +121,7 @@ AUTH_USER_MODEL = 'authentication.User'
 
 AUTHENTICATION_BACKEND = (
     'django.contrib.auth.backends.AllowAllUsersModelBackend',
-    'account.backends.CaseInsensitiveModelBackend'
+    # 'account.backends.CaseInsensitiveModelBackend'
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -133,6 +139,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@polygot.com'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
