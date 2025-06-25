@@ -119,10 +119,10 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'authentication.User'
 
-AUTHENTICATION_BACKEND = (
+AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.AllowAllUsersModelBackend',
-    # 'account.backends.CaseInsensitiveModelBackend'
-)
+    'authentication.backends.CaseInsensitiveModelBackend'
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {

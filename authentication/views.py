@@ -122,3 +122,64 @@ class ResendToken(APIView):
             "email" : email
         }
         return Response(RETURN_RESPONSE, status=status.HTTP_200_OK)
+
+# Log in View
+# Method: Post
+# Body : email and password
+
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    @handle_exceptions
+    def post(self, request):
+        email = request.data['email']
+        password = request.data['password']
+
+        if not email or not password:
+            RETURN_RESPONSE['status'] = False
+            RETURN_RESPONSE['message'] = "Email and password are required."
+            RETURN_RESPONSE['data'] = {}
+            return Response(RETURN_RESPONSE, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = authenticate(email=email, password=password)
+            if not user:
+                RETURN_RESPONSE['status'] = False
+                RETURN_RESPONSE['message'] = "Invalid email or Password"
+                RETURN_RESPONSE['data'] = {}
+                return Response(RETURN_RESPONSE, status=status.HTTP_400_BAD_REQUEST)
+
+            verified = user.verified
+
+            if verified is False:
+                refresh = RefreshToken.for_user(user)
+                tokens = {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh)
+                }
+                send_verification_email(email)
+                RETURN_RESPONSE['status'] = False
+                RETURN_RESPONSE['message'] = "User not verified, a verification link has been sent to your email"
+                RETURN_RESPONSE['data'] = {
+                    "email_verified": verified,
+                    "tokens": tokens,
+                }
+                return Response(RETURN_RESPONSE, status=status.HTTP_403_FORBIDDEN)
+
+            if user is not None:
+                refresh = RefreshToken.for_user(user)
+                tokens = {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh)
+                }
+                RETURN_RESPONSE['status'] = True
+                RETURN_RESPONSE['message'] = "Login Successful"
+                RETURN_RESPONSE['data'] = tokens
+                return Response(RETURN_RESPONSE, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            RETURN_RESPONSE['status'] = False
+            RETURN_RESPONSE['message'] = str(e)
+            return Response(RETURN_RESPONSE, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
