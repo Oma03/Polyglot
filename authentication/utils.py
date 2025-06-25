@@ -1,6 +1,6 @@
 import random
 from django.core.mail import send_mail
-from .models import Token, User
+from .models import User, Token
 from django.utils.decorators import wraps
 from rest_framework.response import Response
 from rest_framework import status
@@ -27,33 +27,15 @@ def handle_exceptions(view_func):
 def send_verification_email(email):
     # Generate token
     token = secrets.token_urlsafe(32)
-    user = User.objects.get(email=email)
-    user_token = Token.objects.create(user=user, token=token, expires_at=timezone.now() + timedelta(hours=1))
+    user_token = Token.objects.create(email=email, token=token, expires_at=timezone.now() + timedelta(hours=1))
     user_token.save()
 
-    verify_url = f"http://localhost:80000/api/verify-email/?token={token}"
+    verify_url = f"http://localhost:8000/authentication/verify-user/?token={token}"
     # Send email
-    send_mail(
+    print(send_mail(
         'Verify your email',
-        f'Click on this link to verify your email {verify_url}',
+        f'Click on this link to verify your email: {verify_url}',
         'admin@gmail.com',
         [email],
         fail_silently=False,
-    )
-
-# def generate_and_send_reset_otp(email):
-#     # Generate 6-digit OTP
-#     otp = str(random.randint(100000, 999999))
-#     user = User.objects.get(email=email)
-#
-#     # Save OTP in the database
-#     ResetOTP.objects.create(user=user, otp=otp)
-#
-#     #Send email
-#     send_mail(
-#         'Your OTP Code',
-#         f'Your OTP to reset your password is {otp}. It will expire in 5 minutes.',
-#         'admin@gmail.com',
-#         [email],
-#         fail_silently=False,
-#     )
+    ))

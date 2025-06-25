@@ -70,25 +70,55 @@ class VerifyUser(APIView):
 
     @handle_exceptions
     def get(self, request):
-        token = request.GET.get('token')
-        if not token:
+        token = request.GET.get("token")
+        token_obj = Token.objects.get(token=token)
+        if not token_obj:
             RETURN_RESPONSE['status'] = False
             RETURN_RESPONSE['message'] = 'No token provided'
             RETURN_RESPONSE['data'] = {}
             return Response(RETURN_RESPONSE, status=status.HTTP_400_BAD_REQUEST)
-        user = request.user
-        user_token = Token.objects.filter(user=user, token=token)
+        user = User.objects.get(email=token_obj.email)
 
-        if user_token.expires_at < timezone.now():
+        if token_obj.expires_at < timezone.now():
             RETURN_RESPONSE['status'] = False
-            RETURN_RESPONSE['message'] = "Token is expired"
+            RETURN_RESPONSE['message'] = "Token is expired, please request for a new one"
             RETURN_RESPONSE['data'] = {}
             return Response(RETURN_RESPONSE, status=status.HTTP_400_BAD_REQUEST)
 
         user.verified = True
         user.save()
+        token_obj.delete()
         RETURN_RESPONSE['status'] = True
         RETURN_RESPONSE['message'] = "Email verified successfully"
         RETURN_RESPONSE['data'] = {}
 
+        return Response(RETURN_RESPONSE, status=status.HTTP_200_OK)
+
+
+# Resend Token View
+# Method: post
+# Body: email
+
+
+class ResendToken(APIView):
+    permission_classes = [AllowAny]
+
+    @handle_exceptions
+    def post(self, request):
+        email = request.data['email']
+
+        user = User.objects.get(email=email)
+
+        if user.verified is True:
+            RETURN_RESPONSE['status'] = False
+            RETURN_RESPONSE['message'] = "User verified already"
+            RETURN_RESPONSE['data'] = {}
+            return Response(RETURN_RESPONSE, status=status.HTTP_400_BAD_REQUEST)
+
+        send_verification_email(email)
+        RETURN_RESPONSE['status'] = True
+        RETURN_RESPONSE['message'] = "Link sent to email"
+        RETURN_RESPONSE['data'] = {
+            "email" : email
+        }
         return Response(RETURN_RESPONSE, status=status.HTTP_200_OK)

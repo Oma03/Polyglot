@@ -65,27 +65,11 @@ class User(AbstractUser):
         return self.email
 
 
-
 class Token(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email= models.EmailField()
     token = models.CharField(max_length=10000, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user} - {self.token}"
-
-
-# class ResetOTP(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     otp = models.CharField(max_length=6, unique=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     expires_at = models.DateTimeField(default=default_expiry)
-#
-#     def save(self, *args, **kwargs):
-#         if not self.expires_at:
-#             self.expires_at = self.created_at + timedelta(minutes=5)
-#         super().save(*args, **kwargs)
-#
-#     def __str__(self):
-#         return f"{self.user} - {self.otp}"
+        return f"{self.email} - {self.token}"

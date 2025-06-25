@@ -8,7 +8,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class TokenAdmin(admin.ModelAdmin):
-    list_display = ('user', 'token')
+    list_display = ('email', 'token')
 
 
 admin.site.register(User, UserAdmin)
