@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     #apps
     'authentication',
+    'transcriber',
 ]
 
 REST_FRAMEWORK ={
